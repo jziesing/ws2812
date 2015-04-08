@@ -18,44 +18,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
+ 
+#include "ws2812.h"
 
-#include <libopencm3/stm32/rcc.h>
-#include <libopencm3/stm32/gpio.h>
-
-/* Set STM32 to 168 MHz. */
-static void clock_setup(void)
-{
-	rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_168MHZ]);
-
-	/* Enable GPIOD clock. */
-	rcc_periph_clock_enable(RCC_GPIOD);
-}
-
-static void gpio_setup(void)
-{
-	/* Set GPIO12-15 (in GPIO port D) to 'output push-pull'. */
-	gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT,
-			GPIO_PUPD_NONE, GPIO12 | GPIO13 | GPIO14 | GPIO15);
-}
 
 int main(void)
 {
-	int i;
+    uint16_t num_of_leds = 16;
+    uint16_t main_data_block[(num_of_leds*24)+40];
+    ws2812_setup(GPIOD, GPIO_AF2, GPIO12, 
+                    TIM4, TIM_OC1, TIM4_CCR1, RCC_TIM4, NVIC_TIM4_IRQ, DMA1,
+                    DMA_STREAM6, NVIC_DMA1_STREAM6_IRQ, RCC_DMA1);
 
-	clock_setup();
-	gpio_setup();
+    setPixelColor(5, main_data_block, 255, 15, 15);
+    show();
 
-	/* Set two LEDs for wigwag effect when toggling. */
-	gpio_set(GPIOD, GPIO12 | GPIO14);
-
-	/* Blink the LEDs (PD12, PD13, PD14 and PD15) on the board. */
-	while (1) {
-		/* Toggle LEDs. */
-		gpio_toggle(GPIOD, GPIO12 | GPIO13 | GPIO14 | GPIO15);
-		for (i = 0; i < 6000000; i++) { /* Wait a bit. */
-			__asm__("nop");
-		}
-	}
-
-	return 0;
+    while (1) {
+        __WFI();
+    }
+    return 0;
 }
