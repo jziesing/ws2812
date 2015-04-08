@@ -266,7 +266,6 @@ void setPixelColor(uint8_t led_index, uint16_t *data_block,
         }  
     }
     dma_setup(curr_dma_clken, curr_dma_controller, curr_dma_stream, curr_nvic_dma_irq, curr_tim_cc_reg, data_block);
-
 }
 /*
  * Initial method to call to setup ws2812 mod
