@@ -23,7 +23,8 @@ uint16_t data_block_size;
 uint32_t curr_dma_controller; 
 uint8_t curr_dma_stream;
 uint8_t curr_nvic_dma_irq;
-enum rcc_periph_clken curr_tim_cc_reg;
+enum rcc_periph_clken curr_tim_clken;
+uint32_t curr_tim_cc_reg;
 
 enum rcc_periph_clken curr_dma_clken;
 
@@ -264,7 +265,7 @@ void setPixelColor(uint8_t led_index, uint16_t *data_block,
             ++j;
         }  
     }
-    dma_setup(curr_dma_clken, curr_dma_controller, curr_dma_stream, curr_nvic_dma_irq, curr_tim_cc_reg, *data_block);
+    dma_setup(curr_dma_clken, curr_dma_controller, curr_dma_stream, curr_nvic_dma_irq, curr_tim_cc_reg, data_block);
 
 }
 /*
@@ -299,7 +300,9 @@ void ws2812_setup(uint32_t gpio_port, uint8_t af_num, uint8_t gpio_pin,
     curr_dma_stream = dma_stream;
     curr_nvic_dma_irq = nvic_dma_irq; 
     curr_dma_clken = dma_clken;
-
+    curr_tim_clken = tim_clken;
+    curr_tim_cc_reg = tim_cc_reg;
+    
     
 
 }
