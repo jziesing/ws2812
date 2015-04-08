@@ -23,6 +23,7 @@ uint16_t data_block_size;
 uint32_t curr_dma_controller; 
 uint8_t curr_dma_stream;
 uint8_t curr_nvic_dma_irq;
+<<<<<<< HEAD
 enum rcc_periph_clken curr_tim_cc_reg;
 
 enum rcc_periph_clken curr_dma_clken;
@@ -92,6 +93,78 @@ void show(void)
     dma_enable_stream(curr_dma_controller, curr_dma_stream);
 }
 
+=======
+enum rcc_periph_clken curr_tim_clken;
+uint32_t curr_tim_cc_reg;
+
+enum rcc_periph_clken curr_dma_clken;
+
+void clock_setup(void)
+{
+    rcc_clock_setup_hse_3v3(&hse_8mhz_3v3[CLOCK_3V3_168MHZ]);
+}
+
+void gpio_setup(uint32_t gpio_port, uint8_t gpio_pin, uint8_t af_num)
+{
+    rcc_periph_clock_enable(gpio_port);
+    gpio_mode_setup(gpio_port, GPIO_MODE_AF, GPIO_PUPD_NONE, gpio_pin);
+    gpio_set_af(gpio_port, af_num, gpio_pin);
+}
+
+void tim_setup(uint32_t timer, enum tim_oc_id oc_id, 
+        enum rcc_periph_clken tim_clken, uint8_t nvic_timer_irq)
+{
+    rcc_periph_clock_enable(tim_clken);
+    nvic_enable_irq(nvic_timer_irq);
+    timer_reset(timer);
+    timer_set_mode(timer, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE, TIM_CR1_DIR_UP);
+    timer_set_prescaler(timer, 0);
+    timer_continuous_mode(timer);
+    timer_set_period(timer, 104);
+    timer_disable_oc_output(timer, oc_id);
+    timer_disable_oc_clear(timer, oc_id);
+    timer_enable_oc_preload(timer, oc_id);
+    timer_set_oc_slow_mode(timer, oc_id);
+    timer_set_oc_mode(timer, oc_id, TIM_OCM_PWM1);
+    timer_set_oc_polarity_high(timer, oc_id);
+    timer_set_oc_value(timer, oc_id, 0);
+    timer_enable_oc_output(timer, oc_id);
+    timer_enable_preload(timer);
+    timer_enable_counter(timer);
+    timer_enable_irq(timer, TIM_DIER_UDE);
+}
+
+void dma_setup(enum rcc_periph_clken dma_clken, uint32_t dma_controller, 
+                uint8_t dma_stream, uint8_t nvic_dma_irq, uint32_t tim_cc_reg, uint16_t *data_block)
+{
+    rcc_periph_clock_enable(dma_clken);
+    nvic_enable_irq(nvic_dma_irq);
+    dma_stream_reset(dma_controller, dma_stream);
+    dma_set_priority(dma_controller, dma_stream, DMA_SxCR_PL_VERY_HIGH);
+    dma_set_memory_size(dma_controller, dma_stream, DMA_SxCR_MSIZE_8BIT);
+    dma_set_peripheral_size(dma_controller, dma_stream, DMA_SxCR_PSIZE_16BIT);
+    dma_enable_circular_mode(dma_controller, dma_stream);
+    dma_enable_memory_increment_mode(dma_controller, dma_stream);
+    dma_set_transfer_mode(dma_controller, dma_stream, DMA_SxCR_DIR_MEM_TO_PERIPHERAL);
+    dma_set_peripheral_address(dma_controller, dma_stream, (uint32_t)&tim_cc_reg);
+    dma_set_memory_address(dma_controller, dma_stream, (uint32_t)&data_block);
+    // 28 LED's = (24 * 28) + 40 
+    // 40 = 50us/1.25us
+    dma_set_number_of_data(dma_controller, dma_stream, data_block_size);
+    dma_enable_half_transfer_interrupt(dma_controller, dma_stream);
+    dma_enable_transfer_complete_interrupt(dma_controller, dma_stream);
+    dma_channel_select(dma_controller, dma_stream, DMA_SxCR_CHSEL_2);
+    nvic_clear_pending_irq(nvic_dma_irq);
+    nvic_enable_irq(nvic_dma_irq);
+    nvic_set_priority(nvic_dma_irq, 0);
+}
+
+void show(void)
+{
+    dma_enable_stream(curr_dma_controller, curr_dma_stream);
+}
+
+>>>>>>> test_1
 void dma1_stream6_isr(void)
 {
     if (dma_get_interrupt_flag(DMA1, DMA_STREAM6, DMA_HTIF)) {
@@ -264,8 +337,12 @@ void setPixelColor(uint8_t led_index, uint16_t *data_block,
             ++j;
         }  
     }
+<<<<<<< HEAD
     dma_setup(curr_dma_clken, curr_dma_controller, curr_dma_stream, curr_nvic_dma_irq, curr_tim_cc_reg, *data_block);
 
+=======
+    dma_setup(curr_dma_clken, curr_dma_controller, curr_dma_stream, curr_nvic_dma_irq, curr_tim_cc_reg, data_block);
+>>>>>>> test_1
 }
 /*
  * Initial method to call to setup ws2812 mod
@@ -299,7 +376,13 @@ void ws2812_setup(uint32_t gpio_port, uint8_t af_num, uint8_t gpio_pin,
     curr_dma_stream = dma_stream;
     curr_nvic_dma_irq = nvic_dma_irq; 
     curr_dma_clken = dma_clken;
+<<<<<<< HEAD
 
+=======
+    curr_tim_clken = tim_clken;
+    curr_tim_cc_reg = tim_cc_reg;
+    
+>>>>>>> test_1
     
 
 }

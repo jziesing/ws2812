@@ -17,7 +17,7 @@
 ## along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-BINARY = ws2812
+BINARY = main
 
 OBJS = main.o ws2812.o
 
